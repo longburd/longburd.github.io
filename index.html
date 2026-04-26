@@ -86,7 +86,7 @@
     }
 
     try {
-      const url = `https://www.googleapis.com/drive/v3/files?q='${FOLDER_ID}'+in+parents+and+mimeType+contains+'image/'&fields=files(id,name,createdTime)&orderBy=createdTime&key=${API_KEY}`;
+      const url = `https://www.googleapis.com/drive/v3/files?q='${FOLDER_ID}'+in+parents+and+mimeType+contains+'image/'&fields=files(id,name,createdTime)&orderBy=name+desc&key=${API_KEY}`;
       const res = await fetch(url);
 
       if (!res.ok) throw new Error(`API error ${res.status}`);
