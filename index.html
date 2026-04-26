@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Avenue</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    background: #0a0a08;
+    font-family: 'Georgia', serif;
+  }
+
+  #gallery {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(min(100%, 480px), 1fr));
+    gap: 0;
+  }
+
+  .photo {
+    width: 100%;
+    aspect-ratio: 4/3;
+    object-fit: cover;
+    display: block;
+    opacity: 0;
+    transition: opacity 0.6s ease;
+  }
+
+  .photo.loaded {
+    opacity: 1;
+  }
+
+  #status {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 100vh;
+    color: #444;
+    font-size: 14px;
+    letter-spacing: 0.1em;
+    font-family: 'Georgia', serif;
+  }
+
+  #error {
+    display: none;
+    align-items: center;
+    justify-content: center;
+    height: 100vh;
+    color: #554;
+    font-size: 13px;
+    text-align: center;
+    padding: 2rem;
+    line-height: 1.8;
+    font-family: 'Georgia', serif;
+  }
+</style>
+</head>
+<body>
+
+<div id="status">loading</div>
+<div id="error"></div>
+<div id="gallery"></div>
+
+<script>
+  // ─────────────────────────────────────────────
+  // CONFIGURATION — paste your Google Drive folder ID here
+  // Get it from the folder URL: drive.google.com/drive/folders/THIS_PART
+  const FOLDER_ID = '1iR7ZkLMSWd49Bi9swjiZ471ivVkLnyEO';
+  // ─────────────────────────────────────────────
+
+  const API_KEY = 'AIzaSyAMVP0K94jnpwm-6rSgKV2dZJ9iD8IVaa8';
+  // You need a free Google API key with Drive API enabled.
+  // See setup instructions in the README below.
+
+  async function loadGallery() {
+    const status = document.getElementById('status');
+    const error = document.getElementById('error');
+    const gallery = document.getElementById('gallery');
+
+    if (FOLDER_ID === 'YOUR_FOLDER_ID_HERE') {
+      status.style.display = 'none';
+      error.style.display = 'flex';
+      error.innerHTML = 'Open index.html and set your FOLDER_ID and API_KEY.<br>See the README for instructions.';
+      return;
+    }
+
+    try {
+      const url = `https://www.googleapis.com/drive/v3/files?q='${FOLDER_ID}'+in+parents+and+mimeType+contains+'image/'&fields=files(id,name,createdTime)&orderBy=createdTime&key=${API_KEY}`;
+      const res = await fetch(url);
+
+      if (!res.ok) throw new Error(`API error ${res.status}`);
+
+      const data = await res.json();
+      const files = data.files || [];
+
+      status.style.display = 'none';
+
+      if (files.length === 0) {
+        error.style.display = 'flex';
+        error.textContent = 'No images found in folder.';
+        return;
+      }
+
+      files.forEach(file => {
+        const img = document.createElement('img');
+        img.className = 'photo';
+        img.alt = '';
+        img.loading = 'lazy';
+        img.src = `https://drive.google.com/thumbnail?id=${file.id}&sz=w1200`;
+        img.addEventListener('load', () => img.classList.add('loaded'));
+        img.addEventListener('error', () => {
+          // Fall back to full export URL if thumbnail fails
+          img.src = `https://drive.google.com/uc?export=view&id=${file.id}`;
+        });
+        gallery.appendChild(img);
+      });
+
+    } catch (err) {
+      status.style.display = 'none';
+      error.style.display = 'flex';
+      error.innerHTML = `Could not load photos.<br><small style="color:#333;margin-top:8px;display:block">${err.message}</small>`;
+      console.error(err);
+    }
+  }
+
+  loadGallery();
+</script>
+
+<!--
+════════════════════════════════════════════════════
+  SETUP INSTRUCTIONS
+════════════════════════════════════════════════════
+
+1. CREATE A GOOGLE DRIVE FOLDER
+   - Upload your monthly photos to a single folder in Google Drive
+   - Name photos consistently e.g. 2024-01.jpg, 2024-02.jpg etc.
+     so they sort chronologically
+
+2. SHARE THE FOLDER PUBLICLY
+   - Right-click the folder → Share → Change to "Anyone with the link"
+   - Set permission to "Viewer"
+   - Copy the folder ID from the URL:
+     drive.google.com/drive/folders/[THIS IS YOUR FOLDER ID]
+
+3. GET A GOOGLE API KEY (free)
+   - Go to console.cloud.google.com
+   - Create a new project (or use an existing one)
+   - Enable "Google Drive API" (search in the API Library)
+   - Go to Credentials → Create Credentials → API Key
+   - Optionally restrict the key to "Google Drive API" + your domain
+   - Copy the key
+
+4. EDIT THIS FILE
+   - Replace YOUR_FOLDER_ID_HERE with your folder ID
+   - Replace YOUR_API_KEY_HERE with your API key
+
+5. UPLOAD TO YOUR DOMAIN
+   - Upload index.html to your web host (FTP, cPanel, etc.)
+   - Done! Every time you add a photo to the Drive folder,
+     the page updates automatically on next load.
+
+ADDING NEW PHOTOS
+   - Just upload to the same Google Drive folder
+   - Photos appear sorted by upload date (oldest first)
+   - No other changes needed
+
+CUSTOMISATION
+   - Column width: change minmax(min(100%, 480px), 1fr)
+   - Background colour: change #0a0a08 on body
+   - Image ratio: change aspect-ratio: 4/3 on .photo
+   - Order: change orderBy=createdTime to orderBy=name for alphabetical
+
+════════════════════════════════════════════════════
+-->
+
+</body>
+</html>
