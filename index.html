@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Avenue</title>
+<title>l o n g b i r d</title>
 <style>
   * { margin: 0; padding: 0; box-sizing: border-box; }
 
@@ -64,26 +64,17 @@
 
 <script>
   // ─────────────────────────────────────────────
-  // CONFIGURATION — paste your Google Drive folder ID here
-  // Get it from the folder URL: drive.google.com/drive/folders/THIS_PART
   const FOLDER_ID = '1iR7ZkLMSWd49Bi9swjiZ471ivVkLnyEO';
-  // ─────────────────────────────────────────────
+  // Get this from the folder URL: drive.google.com/drive/folders/THIS_PART
 
   const API_KEY = 'AIzaSyAMVP0K94jnpwm-6rSgKV2dZJ9iD8IVaa8';
-  // You need a free Google API key with Drive API enabled.
-  // See setup instructions in the README below.
-
+  // Get this from console.cloud.google.com
+  // ─────────────────────────────────────────────
+ 
   async function loadGallery() {
     const status = document.getElementById('status');
     const error = document.getElementById('error');
     const gallery = document.getElementById('gallery');
-
-    if (FOLDER_ID === 'YOUR_FOLDER_ID_HERE') {
-      status.style.display = 'none';
-      error.style.display = 'flex';
-      error.innerHTML = 'Open index.html and set your FOLDER_ID and API_KEY.<br>See the README for instructions.';
-      return;
-    }
 
     try {
       const url = `https://www.googleapis.com/drive/v3/files?q='${FOLDER_ID}'+in+parents+and+mimeType+contains+'image/'&fields=files(id,name,createdTime)&orderBy=name+desc&key=${API_KEY}`;
@@ -107,7 +98,7 @@
         img.className = 'photo';
         img.alt = '';
         img.loading = 'lazy';
-        img.src = `https://drive.google.com/thumbnail?id=${file.id}&sz=w1200`;
+        img.src = `https://drive.google.com/thumbnail?id=${file.id}&sz=w800`;
         img.addEventListener('load', () => img.classList.add('loaded'));
         img.addEventListener('error', () => {
           // Fall back to full export URL if thumbnail fails
@@ -126,19 +117,6 @@
 
   loadGallery();
 </script>
-
-<!--
-ADDING NEW PHOTOS
-   - Just upload to the same Google Drive folder
-
-CUSTOMISATION
-   - Column width: change minmax(min(100%, 480px), 1fr)
-   - Background colour: change #0a0a08 on body
-   - Image ratio: change aspect-ratio: 4/3 on .photo
-   - Order: change orderBy=createdTime to orderBy=name for alphabetical
-
-════════════════════════════════════════════════════
--->
 
 </body>
 </html>
